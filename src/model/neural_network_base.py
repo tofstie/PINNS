@@ -29,5 +29,3 @@ class NeuralNetworkBase:
     def predict(self, x: np.ndarray) -> np.ndarray:
         """Function to predict"""
         return self.model.predict(x)
-
-

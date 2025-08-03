@@ -19,6 +19,7 @@ class Pipeline:
         self.model.compile(**compile_params)
 
         print("\n--- Training Model ---")
+
         self.model.train(X_train, Y_train, **train_param)
 
         print("\n--- Evaluating Model ---")
@@ -28,6 +29,6 @@ class Pipeline:
 
         print("\n--- Predictions ---")
         predictions = self.model.predict(X_test)
-        predicted_classes = np.argmax(predictions, axis=1)
+        predicted_classes = predictions
         for i in range(min(5, len(X_test))):
             print(f"Sample {i+1}: Predicted class: {predicted_classes[i]}, Actual class: {Y_test[i]}")

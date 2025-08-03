@@ -1,5 +1,6 @@
 from src.dataloader.category_dataloader import DataLoaderCategory
 from src.dataloader.philip_dataloader import DataLoaderPhilip
+from src.dataloader.pendulum_dataloader import DataLoaderPendulum
 
 
 class DataLoaderFactory:
@@ -12,5 +13,7 @@ class DataLoaderFactory:
             return DataLoaderPhilip(test_size=test_size, random_state=random_state)
         elif data_loader_selection == 'category':
             return DataLoaderCategory(test_size=test_size, random_state=random_state)
+        elif data_loader_selection == 'pendulum':
+            return DataLoaderPendulum(test_size=test_size, random_state=random_state)
         else:
             raise ValueError('Invalid data_loader_selection')
