@@ -24,20 +24,22 @@ if __name__ == "__main__":
     Y = theta.flatten()[:,None]
     input_shape = (X.shape[1],)
     model_architecture = [
-        tf.keras.layers.Dense(2, activation=tf.nn.tanh, input_shape=input_shape),
-        tf.keras.layers.Dense(20, activation=tf.nn.tanh),
-        tf.keras.layers.Dense(20, activation=tf.nn.tanh),
+        tf.keras.layers.Dense(2, activation=tf.nn.relu, input_shape=input_shape),
+        tf.keras.layers.Dense(20, activation=tf.nn.relu),
+        tf.keras.layers.Dense(20, activation=tf.nn.relu),
+        tf.keras.layers.Dense(20, activation=tf.nn.relu),
+        tf.keras.layers.Dense(20, activation=tf.nn.relu),
         tf.keras.layers.Dense(1)
     ]
 
     pendulum_parameters = {
         "damping_coefficient": 0.1,
-        "residual_factor": 0.1,
-        "initial_condition_factor": 0.1
+        "residual_factor": 1.0,
+        "initial_condition_factor": 1.0
     }
 
     loss_function = PendulumLoss(pendulum_parameters)
-
+    optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001)
     compile_parameters = {
         "optimizer": "adam",
         "loss": loss_function,
@@ -45,9 +47,9 @@ if __name__ == "__main__":
     }
 
     train_parameters = {
-        "epochs": 50,
+        "epochs": 200,
         "batch_size": 128,
-        "validation_split": 0.1,
+        "validation_split": 0.05,
     }
 
 
@@ -56,7 +58,7 @@ if __name__ == "__main__":
     NN = PendulumNeuralNetwork(model_architecture,pendulum_parameters=pendulum_parameters)
     NN.set_loss_function(loss_function)
     loss_function.model = NN
-    pipe = Pipeline(dataloader,NN)
+    pipe = Pipeline(dataloader,NN, loss_function)
     pipe.run(
         features=X,
         labels=Y,
