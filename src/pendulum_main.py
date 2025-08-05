@@ -1,6 +1,7 @@
 import os
 
 import numpy as np
+import matplotlib.pyplot as plt
 import tensorflow as tf
 
 from scipy.io import loadmat
@@ -17,6 +18,12 @@ if __name__ == "__main__":
     t = pen_data["T"].flatten()[:,None]
     k = pen_data["k"].flatten()[:,None]
 
+    data_path_sample = os.path.join("..", "data", "PENDULUM_SAMPLE.mat")
+    pen_sample_data = loadmat(data_path_sample)
+    theta_sample = pen_sample_data["theta_improved"]
+    t_sample = pen_sample_data["T"].flatten()[:, None]
+    k_sample = pen_sample_data["k_sample"].flatten()[:, None]
+
     K,T = np.meshgrid(k, t)
 
     X = np.hstack((T.flatten()[:,None], K.flatten()[:,None]))
@@ -24,11 +31,11 @@ if __name__ == "__main__":
     Y = theta.flatten()[:,None]
     input_shape = (X.shape[1],)
     model_architecture = [
-        tf.keras.layers.Dense(2, activation=tf.nn.relu, input_shape=input_shape),
-        tf.keras.layers.Dense(20, activation=tf.nn.relu),
-        tf.keras.layers.Dense(20, activation=tf.nn.relu),
-        tf.keras.layers.Dense(20, activation=tf.nn.relu),
-        tf.keras.layers.Dense(20, activation=tf.nn.relu),
+        tf.keras.layers.Dense(2, activation=tf.nn.tanh, input_shape=input_shape),
+        tf.keras.layers.Dense(20, activation=tf.nn.tanh),
+        tf.keras.layers.Dense(20, activation=tf.nn.tanh),
+        tf.keras.layers.Dense(20, activation=tf.nn.tanh),
+        tf.keras.layers.Dense(20, activation=tf.nn.tanh),
         tf.keras.layers.Dense(1)
     ]
 
@@ -39,9 +46,15 @@ if __name__ == "__main__":
     }
 
     loss_function = PendulumLoss(pendulum_parameters)
-    optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001)
+    learning_rate_scheduler = tf.keras.optimizers.schedules.ExponentialDecay(
+        0.001,
+        decay_steps=1000,
+        decay_rate=0.96,
+        staircase=True
+    )
+    optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate_scheduler)
     compile_parameters = {
-        "optimizer": "adam",
+        "optimizer": optimizer,
         "loss": loss_function,
         "metrics": [tf.keras.metrics.Accuracy]
     }
@@ -65,3 +78,22 @@ if __name__ == "__main__":
         compile_params = compile_parameters,
         train_param=train_parameters
     )
+
+    time_axis = np.linspace(0,30,2000)
+    k = k_sample*np.ones(len(time_axis))
+    inputs = np.zeros((len(time_axis),2))
+    inputs[:,0] = time_axis
+    inputs[:,1] = k
+    inputs = dataloader.scaler.transform(inputs)
+    inputs_sample = np.zeros((len(t_sample),2))
+    inputs_sample[:,0] = t_sample[:,0]
+    inputs_sample[:,1] = k_sample * np.ones((len(t_sample),1))[:,0]
+    inputs_sample = dataloader.scaler.transform(inputs_sample)
+    output = NN.model(inputs, training=False)
+    fig, axs = plt.subplots(2,1)
+    axs[0].plot(inputs[:,0],output,label = "PINN")
+    axs[0].plot(inputs_sample[:,0],theta_sample,label = "Original Model")
+    axs[0].legend()
+    axs[1].plot(inputs[:,0],output - theta_sample,label = "L2 Error")
+    axs[1].set_yscale("log")
+    plt.show()

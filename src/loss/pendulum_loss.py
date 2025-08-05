@@ -23,8 +23,10 @@ class PendulumLoss(PhysicsInformedLoss):
             with tf.GradientTape(persistent=True) as inner_tape:
                 inner_tape.watch(x_input)
                 u = self.model.model(x_input,training=False)
-            du_dt = inner_tape.gradient(u, x_input)
-        d2u_dt2 = tape.gradient(du_dt, x_input)
+                du_dt = inner_tape.gradient(u, x_input)
+            du_dt = tf.divide(du_dt, self.scaler_std)
+            d2u_dt2 = tape.gradient(du_dt, x_input)
+        d2u_dt2 = tf.divide(d2u_dt2, tf.square(self.scaler_std))
         return u[:,0], tf.cast(du_dt[:,0],dtype=tf.float32), tf.cast(d2u_dt2[:,0],dtype=tf.float32)
 
     @tf.function
