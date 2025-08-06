@@ -1,0 +1,19 @@
+title: PINNs
+author: Tyson Ofstie
+description: Website describing Physics Informed Neural Networks
+
+minima:
+  social_links:
+    github: tofstie
+
+theme: minima
+
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+
+kramdown:
+  input: GFM
+  hand_wrap: false
+  math_engine: mathjax

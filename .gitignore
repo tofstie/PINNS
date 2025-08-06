@@ -152,7 +152,7 @@ venv.bak/
 .ropeproject
 
 # mkdocs documentation
-/site
+#/site
 
 # mypy
 .mypy_cache/
@@ -211,3 +211,8 @@ __marimo__/
 
 # PINN Data
 data/
+
+# Jekyll
+site/.jekyll-cache/
+site/_site/
+site/Gemfile.lock/
