@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+from tensorflow.python.eager import tape
 
 from src.loss.physics_informed_loss import PhysicsInformedLoss
 
@@ -8,24 +9,26 @@ class PendulumLoss(PhysicsInformedLoss):
     def __init__(self, parameters, **kwargs):
         super().__init__(parameters,**kwargs)
         self.damping_coefficient = parameters['damping_coefficient']
+        self.initial_position = parameters['initial_position']
+        self.initial_velocity = parameters['initial_velocity']
 
     def residual_error(self, x_input, y_pred) -> float:
         """Function to compute the residual error of the Pendulum PDE"""
-        u, du_dt, d2u_dt2 = self.compute_gradients(x_input,y_pred)
+        u, du_dt, d2u_dt2 = self.compute_gradients(x_input)
         damping_coefficient = tf.cast(tf.multiply(self.scaler_std[1],x_input[:,1]) + self.scaler_mean[1],dtype=tf.float32)
         residual = d2u_dt2 + tf.multiply(damping_coefficient, du_dt) + tf.sin(u)
         return tf.reduce_mean(tf.square(residual))
 
-    def compute_gradients(self, x_input, y_pred):
+    def compute_gradients(self, x_input):
         """Function to compute the gradients of the Pendulum PDE using AD"""
         with tf.GradientTape(persistent=True) as tape:
             tape.watch(x_input)
             with tf.GradientTape(persistent=True) as inner_tape:
                 inner_tape.watch(x_input)
                 u = self.model.model(x_input,training=False)
-                du_dt = inner_tape.gradient(u, x_input)
+            du_dt = inner_tape.gradient(u, x_input)
             du_dt = tf.divide(du_dt, self.scaler_std)
-            d2u_dt2 = tape.gradient(du_dt, x_input)
+        d2u_dt2 = tape.gradient(du_dt, x_input)
         d2u_dt2 = tf.divide(d2u_dt2, tf.square(self.scaler_std))
         return u[:,0], tf.cast(du_dt[:,0],dtype=tf.float32), tf.cast(d2u_dt2[:,0],dtype=tf.float32)
 
@@ -45,5 +48,7 @@ class PendulumLoss(PhysicsInformedLoss):
         x_init_scaled = (zero-self.scaler_mean)/self.scaler_std
         # Replace the second column of our scaled tensor.
         x_init = tf.tensor_scatter_nd_update(x_init_scaled, indices, updates)
-        residual = self.model.model(x_init, training = False) - tf.constant(np.pi/4,dtype=tf.float32)
-        return tf.reduce_mean(tf.square(residual))
+        u,du_dt,d2u_dt = self.compute_gradients(x_init)
+        residual_position = u - tf.constant(self.initial_position,dtype=tf.float32)
+        residual_velocity = du_dt - tf.constant(self.initial_velocity,dtype=tf.float32)
+        return tf.add(tf.reduce_mean(tf.square(residual_velocity)),tf.reduce_mean(tf.square(residual_position)))

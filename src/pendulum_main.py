@@ -42,7 +42,9 @@ if __name__ == "__main__":
     pendulum_parameters = {
         "damping_coefficient": 0.1,
         "residual_factor": 1.0,
-        "initial_condition_factor": 1.0
+        "initial_condition_factor": 1.0,
+        "initial_velocity": 0.0,
+        "initial_position": np.pi/4
     }
 
     loss_function = PendulumLoss(pendulum_parameters)
@@ -94,6 +96,6 @@ if __name__ == "__main__":
     axs[0].plot(inputs[:,0],output,label = "PINN")
     axs[0].plot(inputs_sample[:,0],theta_sample,label = "Original Model")
     axs[0].legend()
-    axs[1].plot(inputs[:,0],output - theta_sample,label = "L2 Error")
+    axs[1].plot(inputs[:,0],np.abs(output - theta_sample),label = "L2 Error")
     axs[1].set_yscale("log")
     plt.show()

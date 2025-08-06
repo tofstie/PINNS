@@ -15,6 +15,7 @@ class PhysicsInformedLoss:
         MSE = tf.keras.losses.MSE(y_true, y_pred)
         residual = self.residual_error(x, y_pred)
         initial_conditions_error = self.initial_condition_error(x)
+
         return MSE + self.initial_condition_factor*initial_conditions_error + self.residual_factor*residual
 
     def residual_error(self, x_input, y_pred) -> float:
@@ -23,6 +24,10 @@ class PhysicsInformedLoss:
 
     def initial_condition_error(self, x_input) -> float:
         """Virtual Function to compute the initial condition error of the PDE"""
+        return
+
+    def boundary_condition_error(self, x_input) -> float:
+        """Virtual Function to compute the boundary condition error of the PDE"""
         return
 
     def set_scaler(self, scaler):
