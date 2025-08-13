@@ -2,6 +2,7 @@ from src.dataloader.category_dataloader import DataLoaderCategory
 from src.dataloader.philip_dataloader import DataLoaderPhilip
 from src.dataloader.pendulum_dataloader import DataLoaderPendulum
 from src.dataloader.burgers_dataloader import DataLoaderBurgers
+from src.dataloader.advection_dataloader import DataLoaderAdvection
 
 
 class DataLoaderFactory:
@@ -18,5 +19,7 @@ class DataLoaderFactory:
             return DataLoaderPendulum(test_size=test_size, random_state=random_state)
         elif data_loader_selection == 'burgers':
             return DataLoaderBurgers(test_size=test_size, random_state=random_state)
+        elif data_loader_selection == 'advection':
+            return DataLoaderAdvection(test_size=test_size, random_state=random_state)
         else:
             raise ValueError('Invalid data_loader_selection')
