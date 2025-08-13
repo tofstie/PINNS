@@ -17,9 +17,10 @@ if __name__ == "__main__":
         tf.keras.layers.Dense(3, activation=tf.nn.softmax)
     ]
 
+    loss_function = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
     compile_parameters = {
         "optimizer": "adam",
-        "loss": tf.keras.losses.SparseCategoricalCrossentropy,
+        "loss": loss_function,
         "metrics": [tf.keras.metrics.SparseCategoricalAccuracy]
     }
 
@@ -27,12 +28,13 @@ if __name__ == "__main__":
         "epochs": 50,
         "batch_size": 32,
         "validation_split": 0.1,
+        "scaler_required": False
     }
 
     dataloader = DataLoaderFactory().create_data_loader("category",test_size=0.2,random_state=42)
     NN = CategoryNeuralNetwork(model_layers=model_architecture)
 
-    pipe = Pipeline(dataloader,NN)
+    pipe = Pipeline(dataloader,NN,loss_function)
     pipe.run(
         features=X,
         labels=Y,

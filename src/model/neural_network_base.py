@@ -11,6 +11,7 @@ class NeuralNetworkBase:
     """
     def __init__(self, model_layers: List[tf.keras.layers.Layer]):
         self.model = tf.keras.models.Sequential(model_layers)
+        self.iter_loss = None
 
     def compile(self, optimizer: str, loss: str, metrics: List[str]):
         """Compile the Model"""

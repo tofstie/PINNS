@@ -15,7 +15,6 @@ class TestPendulumLoss(unittest.TestCase):
         self.x = tf.convert_to_tensor(x, dtype=tf.float32)
         self.y = tf.convert_to_tensor(y, dtype=tf.float32)
         self.parameters = {
-        "damping_coefficient": 0.1,
         "residual_factor": 1.0,
         "initial_condition_factor": 1.0,
         "initial_velocity": 0.0,

@@ -29,7 +29,7 @@ class PhysicsBasedNerualNetwork(NeuralNetworkBase):
         """Function to train the neural network"""
         if not (0 < validation_split < 1):
             raise ValueError("validation_split must be between 0 and 1.")
-
+        self.iter_loss = np.zeros((epochs,2))
         split_at = int(len(x) * (1 - validation_split))
         x_train, x_val = x[:split_at], x[split_at:]
         y_train, y_val = y[:split_at], y[split_at:]
@@ -56,6 +56,8 @@ class PhysicsBasedNerualNetwork(NeuralNetworkBase):
                 f"Train Loss: {train_loss_result.numpy():.6f}, "
                 f"Validation Loss: {val_loss_result.numpy():.6f}"
             )
+            self.iter_loss[epoch,:] = np.array([epoch+1,train_loss_result.numpy()])
+
         return {"final_train_loss": train_loss_result, "final_validation_loss": val_loss_result}
 
     def evaluate(self, x: np.ndarray, y: np.ndarray):
@@ -64,4 +66,5 @@ class PhysicsBasedNerualNetwork(NeuralNetworkBase):
         y_pred = self.model(x_tensor, training=False)
         loss = self.loss.call(y_tensor, y_pred, x_tensor)
         accuracy = self.test_metrics(y_tensor,y_pred)
-        return tf.reduce_sum(loss), accuracy
+        loss = tf.reduce_sum(loss)
+        return loss.numpy(), accuracy.numpy()

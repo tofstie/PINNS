@@ -25,6 +25,7 @@ In the PINN presented, the following variables are the inputs and outputs:
 ### Assumptions:
 - $\frac{g}{l} = 1$
 - No Forcing
+
 ### Loss Function
 The loss function in this PINN is split into three parts. The first is the standard MSE of the output of the model.
 Secondly, the residual is included in the loss function. The residual of the PINN  is calculated using the models predicted

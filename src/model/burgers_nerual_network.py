@@ -4,10 +4,10 @@ from typing import List, Dict
 
 from src.model.physics_based_nerual_network import PhysicsBasedNerualNetwork
 
-class PendulumNeuralNetwork(PhysicsBasedNerualNetwork):
+class BurgersNerualNetwork(PhysicsBasedNerualNetwork):
     def __init__(self,
                  model_layers: List[tf.keras.layers.Layer],
-                 pendulum_parameters: Dict[str, float]):
+                 burgers_parameters: Dict[str, np.ndarray]
+                 ):
         super().__init__(model_layers)
-        self.pendulum_parameters = pendulum_parameters
-
+        self.burgers_parameters = burgers_parameters
