@@ -13,7 +13,9 @@ class BurgersLoss(PhysicsInformedLoss):
 
     def residual_error(self, x_input, y_pred) -> tf.Tensor:
         """Function to compute the residual error of the Burgers PDE"""
+        shapes = tf.shape(x_input)
         u, du_dt, du_dx = self.compute_gradients(x_input)
+        u = tf.reshape(u, [shapes[0]])
         residual = du_dt + tf.multiply(u,du_dx)
         return tf.reduce_sum(tf.square(residual))
 
@@ -40,6 +42,7 @@ class BurgersLoss(PhysicsInformedLoss):
 
         x_init = tf.tensor_scatter_nd_update(x_init_scaled, indices, positions)
         u = self.model.model(x_init,training=False)
+        u = tf.reshape(u, [r])
         if self.initial_position == "cos":
             scaled_input = tf.multiply(positions,self.scaler_std[1]) + self.scaler_mean[1]
             residual = u - tf.cos(scaled_input)

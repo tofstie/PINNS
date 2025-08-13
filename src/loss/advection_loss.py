@@ -42,12 +42,10 @@ class AdvectionLoss(PhysicsInformedLoss):
 
         x_init = tf.tensor_scatter_nd_update(x_init_scaled, indices, positions)
         u = self.model.model(x_init, training=False)
+        u = tf.reshape(u, [r])
+        scaled_input = tf.multiply(positions,self.scaler_std[1]) + self.scaler_mean[1]
+        residual = u - tf.cos(scaled_input)
 
-        if self.initial_position == "cos":
-            scaled_input = tf.multiply(positions,self.scaler_std[1]) + self.scaler_mean[1]
-            residual = u - tf.cos(scaled_input)
-        else:
-            residual = tf.constant(0.0)
         return tf.reduce_sum(tf.square(residual))
 
     def boundary_condition_error(self, x_input) -> tf.Tensor:

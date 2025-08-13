@@ -41,7 +41,7 @@ if __name__ == "__main__":
     ]
     burgers_parameters = {
         "residual_factor": 0.1,
-        "initial_condition_factor": 0.0,
+        "initial_condition_factor": 0.1,
         "initial_position": "cos",
         "boundary_condition": "periodic"
     }
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     ax.set_ylabel("Loss")
     plt.show()
 
-    sample_idx = 461
+    sample_idx = 0
     time_sample = t[sample_idx]*np.ones(x.shape)
     inputs_for_plot = np.zeros((len(x),2))
     inputs_for_plot[:,0] = time_sample[:,0]
@@ -112,9 +112,9 @@ if __name__ == "__main__":
     output_fig_params.add_y_axes_settings(r'theta', yscale = "linear")
     output_fig_params.add_y_axes_settings(r'L1 error', yscale = "log")
     ## Setting up data
-    PINN_data = DataParameters(x = inputs[:,1],y = output,label = "PINN")
-    Actual_data = DataParameters(x = x,y = u[:,sample_idx],label = "Original Model")
-    Error_data = DataParameters(x = x,y = np.abs(output[:,0] - u[:,sample_idx]),label = "L2 Error")
+    PINN_data = DataParameters(x = x, y = output,label = "PINN")
+    Actual_data = DataParameters(x = x, y = u[:,sample_idx],label = "Original Model")
+    Error_data = DataParameters(x = x, y = np.abs(output[:,0] - u[:,sample_idx]),label = "L2 Error")
 
     output_fig_params.add_data(PINN_data,0)
     output_fig_params.add_data(Actual_data,0)

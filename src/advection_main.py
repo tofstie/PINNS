@@ -37,14 +37,14 @@ if __name__ == "__main__":
 
     advection_parameters = {
         "residual_factor": 0.1,
-        "initial_condition_factor": 0.0,
+        "initial_condition_factor": 0.1,
         "initial_position": "cos",
         "boundary_condition": "periodic",
         "wave_speed": tf.constant(2.0,dtype=tf.float64)
     }
 
     train_parameters = {
-        "epochs": 1000,
+        "epochs": 10000,
         "batch_size": 64,
         "validation_split": 0.05,
         "scaler_required": True
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     ax.set_ylabel("Loss")
     plt.show()
 
-    sample_idx = 0
+    sample_idx = 61
     time_sample = t[sample_idx]*np.ones(x.shape)
     inputs_for_plot = np.zeros((len(x),2))
     inputs_for_plot[:,0] = time_sample[:,0]
