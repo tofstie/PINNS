@@ -26,26 +26,29 @@ if __name__ == "__main__":
     }
 
     train_parameters = {
-        "epochs": 1000,
-        "batch_size": 64,
+        "epochs": 20,
+        "batch_size": 128,
         "validation_split": 0.05,
         "scaler_required": True
     }
 
-    data_path = os.path.join("..", "data", "ADVECTION.mat")
+    data_path = os.path.join("..", "data", "ADVECTION2D.mat")
     advection_data = loadmat(data_path)
     u = advection_data["u_solutions"]
     t = advection_data["T"].flatten()[:, None]
     x = advection_data["x"].flatten()[:, None]
+    y = advection_data["y"].flatten()[:, None]
+    X,Y,T = np.meshgrid(x,y,t,indexing='xy')
 
-    T,X = np.meshgrid(t,x)
-
-    INPUT = np.hstack((T.flatten()[:,None], X.flatten()[:,None]))
+    INPUT = np.hstack((T.flatten()[:,None], X.flatten()[:,None], Y.flatten()[:,None]))
     OUTPUT = u.flatten()[:,None]
 
     input_shape = (INPUT.shape[1],)
     model_architecture = [
-        tf.keras.layers.Dense(2, activation=tf.nn.tanh, input_shape=input_shape, dtype=tf.float64),
+        tf.keras.layers.Dense(1+advection_parameters["dimension"], activation=tf.nn.tanh, input_shape=input_shape, dtype=tf.float64),
+        tf.keras.layers.Dense(50, activation=tf.nn.tanh, dtype=tf.float64),
+        tf.keras.layers.Dense(50, activation=tf.nn.tanh, dtype=tf.float64),
+        tf.keras.layers.Dense(50, activation=tf.nn.tanh, dtype=tf.float64),
         tf.keras.layers.Dense(50, activation=tf.nn.tanh, dtype=tf.float64),
         tf.keras.layers.Dense(50, activation=tf.nn.tanh, dtype=tf.float64),
         tf.keras.layers.Dense(50, activation=tf.nn.tanh, dtype=tf.float64),
@@ -94,32 +97,40 @@ if __name__ == "__main__":
     plt.show()
 
     sample_idx = 61
-    time_sample = t[sample_idx]*np.ones(x.shape)
-    inputs_for_plot = np.zeros((len(x),2))
-    inputs_for_plot[:,0] = time_sample[:,0]
-    inputs_for_plot[:,1] = x[:,0]
+    time_sample = t[sample_idx]
+    X_samp, Y_samp, T_samp = np.meshgrid(x, y, time_sample, indexing='xy')
+    inputs_for_plot = np.hstack((X_samp.flatten()[:,None], Y_samp.flatten()[:,None], T_samp.flatten()[:,None]))
     inputs = dataloader.scaler.transform(inputs_for_plot)
     output = NN.model(inputs, training = False)
 
-    ## Setting up Output Figure
-    params = VisualizationParameters()
-    output_fig_params = FigureParameters()
-    output_fig_params.type = "subplot"
-    output_fig_params.subplot_rows = 2
-    output_fig_params.subplot_cols = 1
-    output_fig_params.add_x_axes_settings("Time (s)")
-    output_fig_params.add_y_axes_settings(r'theta', yscale = "linear")
-    output_fig_params.add_y_axes_settings(r'L1 error', yscale = "log")
-    ## Setting up data
-    PINN_data = DataParameters(x = x, y = output,label = "PINN")
-    Actual_data = DataParameters(x = x, y = u[:,sample_idx],label = "Original Model")
-    Error_data = DataParameters(x = x, y = np.abs(output[:,0] - u[:,sample_idx]),label = "L2 Error")
-
-    output_fig_params.add_data(PINN_data,0)
-    output_fig_params.add_data(Actual_data,0)
-    output_fig_params.add_data(Error_data,1)
-
-    params.figures.append(output_fig_params)
-    ## Visualize data
-    visualization = VisualizationBase(params)
-    visualization.visualize()
+    fig, ax = plt.subplots(1,1,subplot_kw={"projection": "3d"})
+    ax.plot_surface(np.squeeze(X_samp),np.squeeze(Y_samp), np.squeeze(np.reshape(output.numpy(),[50,50,1])))
+    plt.show()
+    fig, ax = plt.subplots(1,1,subplot_kw={"projection": "3d"})
+    ax.plot_surface(np.squeeze(X_samp),np.squeeze(Y_samp), np.squeeze(u[:,:,sample_idx]))
+    plt.show()
+    # ## Setting up Output Figure
+    # params = VisualizationParameters()
+    # output_fig_params = FigureParameters()
+    # output_fig_params.dims = 3
+    # output_fig_params.type = "subplot"
+    # output_fig_params.subplot_rows = 3
+    # output_fig_params.subplot_cols = 1
+    # output_fig_params.add_x_axes_settings("Time (s)")
+    # output_fig_params.add_y_axes_settings(r'theta', yscale = "linear")
+    # output_fig_params.add_y_axes_settings(r'theta Sample', yscale="linear")
+    # output_fig_params.add_y_axes_settings(r'L1 error', yscale = "linear")
+    # output_fig_params.use_legend = False
+    # ## Setting up data
+    # PINN_data = DataParameters(x = X_samp.flatten()[:,None], y = Y_samp.flatten()[:,None], z = output,label = "PINN",plot_type="surf")
+    # Actual_data = DataParameters(x = X_samp.flatten()[:,None], y = Y_samp.flatten()[:,None],z = u[:,:,sample_idx].flatten()[:,None],label = "Original Model",plot_type="surf")
+    # Error_data = DataParameters(x = X_samp.flatten()[:,None], y = Y_samp.flatten()[:,None] ,z = np.abs(output - u[:,:,sample_idx].flatten()[:,None]),label = "L2 Error",plot_type="surf")
+    #
+    # output_fig_params.add_data(PINN_data,0)
+    # output_fig_params.add_data(Actual_data,1)
+    # output_fig_params.add_data(Error_data,2)
+    #
+    # params.figures.append(output_fig_params)
+    # ## Visualize data
+    # visualization = VisualizationBase(params)
+    # visualization.visualize()

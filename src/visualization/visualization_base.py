@@ -38,6 +38,8 @@ class VisualizationBase:
                         ax.plot(data.x, data.y, label = data.label, marker = data.marker)
                     elif data.plot_type == "scatter":
                         ax.scatter(data.x, data.y, label = data.label, marker = data.marker, s = data.marker_size)
+                    elif data.plot_type == "surf":
+                        ax.plot_surface(data.x, data.y, data.z)
                 ax.set_ylabel(figure.ylabel[0])
                 ax.set_xlabel(figure.xlabel[0])
                 ax.set_yscale(figure.yscale[0])
@@ -48,12 +50,17 @@ class VisualizationBase:
                     else:
                         ax.legend(loc = figure.legend_loc)
             elif figure.type == "subplot":
-                fig, axes = plt.subplots(figure.subplot_rows, figure.subplot_cols,figsize=figure.figsize, dpi = figure.dpi)
+                if figure.dims == 3:
+                    fig, axes = plt.subplots(figure.subplot_rows, figure.subplot_cols,figsize=figure.figsize, dpi = figure.dpi, subplot_kw={"projection": "3d"})
+                else:
+                    fig, axes = plt.subplots(figure.subplot_rows, figure.subplot_cols, figsize=figure.figsize, dpi=figure.dpi)
                 for idx, data in zip(figure.figure_idx, figure.data):
                     if data.plot_type == "plot":
                         axes[idx].plot(data.x, data.y, label = data.label, marker = data.marker)
                     elif data.plot_type == "scatter":
                         axes[idx].scatter(data.x, data.y, label = data.label, marker = data.marker, s = data.marker_size)
+                    elif data.plot_type == "surf":
+                        axes[idx].plot_surface(data.x, data.y, data.z)
                 for idx, xlabel, xscale in zip(range(0,len(figure.xlabel)),figure.xlabel, figure.xscale):
                     axes[idx].set_xlabel(xlabel)
                     axes[idx].set_xscale(xscale)

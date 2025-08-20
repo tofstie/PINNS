@@ -15,5 +15,8 @@ The project can then be run with any of the mains for the various PDEs.
 ---
 - Categorical NN
 - Damped Pendulum
+- Linear Advection
+- Inviscid Burgers
+- 
 
 

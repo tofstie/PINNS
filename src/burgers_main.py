@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
 
     train_parameters = {
-        "epochs": 20,
+        "epochs": 200,
         "batch_size": 80,
         "validation_split": 0.05,
         "scaler_required": True
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     learning_rate_scheduler = tf.keras.optimizers.schedules.ExponentialDecay(
         0.001,
         decay_steps = train_parameters['epochs'],
-        decay_rate = 1.0,
+        decay_rate = 0.98,
         staircase = True
     )
     optimizer_adam = tf.keras.optimizers.Adam(learning_rate = learning_rate_scheduler)
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     ax.set_ylabel("Loss")
     plt.show()
 
-    sample_idx = 0
+    sample_idx = 300
     time_sample = t[sample_idx]*np.ones(x.shape)
     inputs_for_plot = np.zeros((len(x),2))
     inputs_for_plot[:,0] = time_sample[:,0]

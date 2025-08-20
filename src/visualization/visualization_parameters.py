@@ -21,6 +21,7 @@ class FigureParameters:
         self.dpi = 600
         self.subplot_rows = 0
         self.subplot_cols = 0
+        self.dims = 2
 
         # Legend Settings
         self.use_legend = True
